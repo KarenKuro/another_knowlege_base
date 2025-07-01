@@ -33,7 +33,7 @@ cp .env.example .env.development
 ### 3. Запуск базы данных PostgreSQL
 
 ```bash
-docker-compose --env-file .env.development up -d
+docker-compose up -d
 ```
 
 ### 4. Применить миграции и сгенерировать Prisma Client
