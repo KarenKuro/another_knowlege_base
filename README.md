@@ -20,7 +20,7 @@
 
 ```bash
 git clone https://github.com/KarenKuro/another_knowlege_base.git
-cd another-knowelege-base
+cd another_knowelege_base
 npm ci
 ```
 
