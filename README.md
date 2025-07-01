@@ -19,7 +19,7 @@
 ### 1. Клонировать репозиторий и установить зависимости:
 
 ```bash
-git clone <your_repo_url>
+git clone https://github.com/KarenKuro/another_knowlege_base.git
 cd another-knowelege-base
 npm ci
 ```
