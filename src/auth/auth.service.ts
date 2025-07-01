@@ -6,6 +6,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  OnApplicationBootstrap,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -14,9 +15,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDTO } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDTO } from './dto/login.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnApplicationBootstrap {
   constructor(
     private readonly _jwtService: JwtService,
 
@@ -26,11 +28,20 @@ export class AuthService {
     private readonly _prismaService: PrismaService,
   ) {}
 
+  async onApplicationBootstrap() {
+    const defoult_Admin = {
+      name: 'admin',
+      email: 'admin@admin.ru',
+      password: '12345',
+    };
+
+    await this._upsert(defoult_Admin, true);
+  }
+
   async register({
     name,
     email,
     password,
-    isAdmin = false,
   }: CreateUserDTO): Promise<AuthTokensDTO> {
     const existUser = await this._prismaService.user.findUnique({
       where: { email },
@@ -42,11 +53,11 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 15);
 
-    const user = await this._prismaService.user.create({
-      data: { name, email, password: hashedPassword, isAdmin },
+    const user: User = await this._prismaService.user.create({
+      data: { name, email, password: hashedPassword, isAdmin: false },
     });
 
-    return this._generateTokens({ id: user.id, email, isAdmin });
+    return this._generateTokens({ id: user.id, email, isAdmin: false });
   }
 
   async login(body: LoginDTO): Promise<AuthTokensDTO> {
@@ -121,5 +132,20 @@ export class AuthService {
     const newRefreshToken = this.createRefreshToken(data);
 
     return { accessToken, refreshToken: newRefreshToken };
+  }
+
+  private async _upsert(user: CreateUserDTO, isAdmin) {
+    const hashedPassword = await bcrypt.hash(user.password, 15);
+
+    await this._prismaService.user.upsert({
+      where: { email: user.email },
+      update: { name: user.name, password: hashedPassword, isAdmin },
+      create: {
+        name: user.name,
+        email: user.email,
+        password: hashedPassword,
+        isAdmin,
+      },
+    });
   }
 }

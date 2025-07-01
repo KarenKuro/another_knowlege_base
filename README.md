@@ -9,3 +9,9 @@ npm ci
 
 для просмотра базы в браузере
 npx dotenv -e .env.development -- prisma studio
+
+
+name: 'admin',
+      email: 'admin@admin.ru',
+      password: '12345',
+      isAdmin: true,

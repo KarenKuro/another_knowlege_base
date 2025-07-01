@@ -28,10 +28,4 @@ export class CreateUserDTO {
   @MaxLength(32)
   @IsNotEmpty()
   password: string;
-
-  @ApiPropertyOptional({ type: Boolean, default: false })
-  @IsBoolean()
-  @IsNotEmpty()
-  @Transform(({ value }) => value === 'false')
-  isAdmin?: boolean;
 }
