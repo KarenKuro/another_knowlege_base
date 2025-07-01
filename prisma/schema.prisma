@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -11,13 +10,49 @@ datasource db {
 model User {
   id Int @id @default(autoincrement())
 
-  name  String
-  email String @unique
+  name     String @db.VarChar(32)
+  email    String @unique
+  password String
 
   isAdmin Boolean @default(false) @map("is_admin")
+
+  articles           Article[] @relation("author_articles")
+  lastEditedArticles Article[] @relation("last_editor")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model Article {
+  id Int @id @default(autoincrement())
+
+  title   String @db.VarChar(255)
+  content String @db.Text
+
+  tags Tag[] @relation("article_tags")
+
+  author   User @relation("author_articles", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId Int  @map("author_id")
+
+  lastEditor   User @relation("last_editor", fields: [lastEditorId], references: [id])
+  lastEditorId Int  @map("last_editor_id")
+
+  isPublic Boolean @default(false) @map("is_public")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("articles")
+}
+
+model Tag {
+  id Int @id @default(autoincrement())
+
+  name String @unique @db.VarChar(50)
+
+  articles Article[] @relation("article_tags")
+
+  @@map("tags")
 }
